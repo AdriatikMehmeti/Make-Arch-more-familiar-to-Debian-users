@@ -1,0 +1,56 @@
+#!/bin/bash
+
+f=$(tput setaf 3)
+r=$(tput setaf 1)
+g=$(tput setaf 2)
+check () {      local srvs="$1"; local srvsc="$2"; local opr="$3";
+                if [[ opr != null ]]; then r=$(systemctl ${opr} ${srvsc}.service | grep Active | cut -d" " -f7); $r; else a=12; fi
+                clear
+                rez=$(systemctl status ${srvsc}.service | grep Active | cut -d" " -f7); $rez
+                if [[ $rez == "active" ]]; then  clear; echo " "; echo "$f ------ >> Service ${srvs^^} - $g ACTIVATED $f - << ------"; echo " ";
+                elif [[ $rez == "inactive" ]]; then clear; echo " "; echo "$f ------ >> Service ${srvs^^} - $r INACTIVATED $f - << ------"; echo " ";
+                else clear; echo $rez
+                fi
+}
+help () {
+                clear;
+                echo $f" _______________________________________________________ "; echo $f"|                                                   |";echo $f"|     ---==*[ Service Manager ]*==---                |"; echo $f"|_______________________________________________________|"; echo $f"  "; echo $f"  * Use example Service ssh + 'to activate'    "; echo $f"  * '+' activate, '-' d>
+}
+
+if [[ $1 == "ssh" ]]; then
+        if [[ $2 == "+" ]]; then check SSH sshd start
+        elif [[ $2 == "-" ]]; then check SSH sshd stop
+        elif [[ $2 == "?" ]]; then check ssh sshd
+        else help
+        fi
+elif [[ $1 == "bluetooth" ]]; then
+        if [[ $2 == "+" ]]; then check BLUETOOTH bluetooth start
+        elif [[ $2 == "-" ]]; then check BLUETOOTH bluetooth stop
+        elif [[ $2 == "?" ]]; then check BLUETOOTH bluetooth
+        else help
+        fi
+elif [[ $1 == "tor" ]]; then
+        if [[ $2 == "+" ]]; then check TOR tor start
+        elif [[ $2 == "-" ]]; then check TOR tor stop
+        elif [[ $2 == "?" ]]; then check TOR tor
+        else help
+        fi
+elif [[ $1 == "apache" ]]; then
+        if [[ $2 == "+" ]]; then check APACHE httpd start
+        elif [[ $2 == "-" ]]; then check APACHE httpd stop
+        elif [[ $2 == "?" ]]; then check APACHE httpd
+        else help
+        fi
+elif [[ $1 == "--list" || $1 == "-l" ]]; then
+        clear
+        echo $f"              ----==== SERVICES LIST ====----             "; systemctl -t service --all
+elif [[ $1 == "--help" || $1 == "-h" ]]; then help
+elif [[ $1 != "--help" || $1 != "h" ]]; then
+        com1=$1
+        if [[ $2 == "+" ]]; then check $com1 $com1 start
+        elif [[ $2 == "-" ]]; then check $com1 $com1 stop
+        elif [[ $2 == "?" ]]; then check $com1 $com1
+        else help
+        fi
+else    help
+fi
